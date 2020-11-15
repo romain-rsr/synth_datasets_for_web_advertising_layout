@@ -1,6 +1,6 @@
-----------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------
                                                 sum up
-----------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------
 
 This repository contains two synthetic datasets of 100,000 samples each and a small real cases dataset of 100 samples. 
 These datasets allow for the training and the evaluation of learning models on generation of advertising layouts, even 
@@ -15,17 +15,17 @@ case where no real ad layout samples are available for training.
 
 Both synthetic datasets can be created, loaded, and displayed through the data_processing_tools jupyter notebook.
 
-----------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------
 	                                    list of datasets
-----------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------
 
 synth1 : first synthetic dataset of 100K samples, created through explicit, fictitious layout rules
 synth2 : second synthetic dataset of 100K samples, created through explicit, realistic layout rules
 real : real cases dataset of few (93) samples, created by designer through intuitive, implicit layout rules 
 
-----------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------
 	        specific rules for the fictitious synthetic dataset (dataset "synth1")
-----------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------
 
 In this dataset, most of the layouts have been created randomly within general constraints, 
 while a minority of other layouts in this dataset have been created through specific rules. 
