@@ -6,7 +6,7 @@ This repository contains two synthetic datasets of 100,000 samples each and a sm
 
 In our first dataset, virtual layouts are created through fictitious layout rules that exacerbate the layout complexity encountered in real web ads, and makes it possible to evaluate the capacity of any experimented model to integrate such complexity. In our second dataset virtual layouts have been generated through a number of realistic layout rules, which are identical to some specific layout rules in real ads. This second dataset allows any learning model to be both pre-trained and evaluated on this synthetic dataset then to be used on real ad layouts with good results, even in the case where no real ad layout samples are available for training.
 
-Both synthetic datasets can be created, loaded, and displayed through the data_processing_tools jupyter notebook.
+Both synthetic datasets can be created, loaded, and displayed through the data_processing_tools jupyter notebook. The real cases dataset is also available and displayed in this notebook. 
 
 -----------------------------------------------------------------------------------------------------------------
 	                                    list of datasets
