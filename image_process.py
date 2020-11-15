@@ -49,10 +49,12 @@ def resize_image(npa,new_width):
 def save_npa_as_image(npa,p):
     get_image_from_npa(npa).save(p)
 
+'''
 def get_image_from_npa(npa):
     if np.shape(npa)[2] == 3: image = Image.fromarray(npa, 'RGB')
     if np.shape(npa)[2] == 4: image = Image.fromarray(npa, 'RGBA')
     return image
+'''
 
 #------------------------------------------------------------------------------------------------------------------------------------
 #                                                        display

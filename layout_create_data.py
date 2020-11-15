@@ -14,11 +14,75 @@ from layout_process import *
 from image_process import *
 
 
+
+
+
+
+
+
+
+
+
+
+#------------------------------------------------------------------------------------------------------------------------------------
+#                                                        # real
+#------------------------------------------------------------------------------------------------------------------------------------
+
+
+def read_pl(file_path):
+    file = open(file_path,"r")
+    text = file.read()
+    file.close()    
+    lines = text.split('\n')
+    pl=[]
+    for line in lines:
+        pl.append(line)
+    return pl
+
+def get_samples_from_xy_real(x,y,names):
+    n_samples=len(x)
+    n_assets=len(x[0])
+    samples=[]
+    for i_sample in range(n_samples):
+        sample=Clay()
+        if len(names)>0:sample.name = names[i_sample]
+        sample.assets=[]
+        for i_asset in range(n_assets):
+            asset=Clay()
+            asset.input_width=int(x[i_sample,i_asset,0])
+            asset.input_height=int(x[i_sample,i_asset,1])
+            asset.type=get_str_cat(x[i_sample,i_asset,2],2)
+            asset.width=int(y[i_sample,i_asset,0])
+            asset.left=int(y[i_sample,i_asset,1])
+            asset.top=int(y[i_sample,i_asset,2])
+            asset.height=int(asset.input_height/asset.input_width*asset.width)
+            asset.right=int(asset.left+asset.width)
+            asset.low=int(asset.top+asset.height)
+            sample.assets.append(asset)
+        samples.append(sample)
+    return samples
+
+
+
 #------------------------------------------------------------------------------------------------------------------------------------
 #                                                        select samples
 #------------------------------------------------------------------------------------------------------------------------------------
 
-def get_special_combinaisons():
+def get_special_combinations_trigram():
+    special_combinaisons=[]
+    special_combinaisons.append("rrr")
+    special_combinaisons.append("rrb")
+    special_combinaisons.append("rgb")
+    special_combinaisons.append("rbr")
+    special_combinaisons.append("ggr")
+    special_combinaisons.append("ggg")
+    special_combinaisons.append("brb")
+    special_combinaisons.append("bgb")
+    special_combinaisons.append("bbg")
+    special_combinaisons.append("bbb")
+    return special_combinaisons
+
+def get_special_combinations():
     special_combinaisons=[]
     special_combinaisons.append(["red","red","red"])
     special_combinaisons.append(["red","red","blue"])
@@ -32,6 +96,7 @@ def get_special_combinaisons():
     special_combinaisons.append(["blue","blue","blue"])
     return special_combinaisons
 
+# check if synth2 sample is concerned by general rules
 def is_general(sample,special_combinaisons):
     ok=1
     types=[]
@@ -43,7 +108,7 @@ def is_general(sample,special_combinaisons):
 def select_general_samples(samples,option_select):
     # option select 1 => general rules
     # option select 0 => special rules
-    special_combinaisons=get_special_combinaisons()
+    special_combinaisons=get_special_combinations()
     valid_samples=[]
     for sample in samples:
         if is_general(sample,special_combinaisons)==option_select:valid_samples.append(sample)
@@ -67,8 +132,24 @@ def get_y_gan_general(y_gan,option_rules):
 (copy.deepcopy(sample)
 '''
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #------------------------------------------------------------------------------------------------------------------------------------
-#                                                        create samples
+#                                                        # synth 2
 #------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -318,7 +399,6 @@ def select_synth_samples(samples):
         if ok==1:valid_samples.append(copy.deepcopy(sample))
     return valid_samples
 
-# now
 
 def create_synth2(n_samples):
 
@@ -352,8 +432,26 @@ def create_synth2(n_samples):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
-#                                                                  synth 1
+#                                                                  # synth 1
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -757,7 +855,7 @@ def create_sample1(h,w):
         slots[1].top = int(round(h-int(round(.3*w))))
         slots[2].left = w-int(round(.3*w))
         slots[2].top = int(round(h-int(round(.3*w))))
-        
+
     #GGR
     
     # 2 green 1 red => on the right
@@ -856,6 +954,13 @@ def create_synth1(n_samples):
         #'''
         if len(samples)%10000==0:print(len(samples),time.ctime())
         slots,params = create_sample1(h,w)
+
+        '''
+        for s in slots:
+            #if s.left+s.w>300:print("tag0 : error",s.left+s.w)
+            if s.right>300:print("tag0 : error",s.right)
+        '''
+
         samples.append([slots,h,w])
     print(len(samples),time.ctime())
     
@@ -933,7 +1038,9 @@ def create_synth1(n_samples):
         left0 = coordinates[i,0,1]
         left1 = coordinates[i,1,1]
         left2 = coordinates[i,2,1]
-        
+
+        #tag1
+
         # slots categories
         type0 = semantics[i,0]
         type1 = semantics[i,1]
@@ -1042,9 +1149,10 @@ def create_synth1(n_samples):
     np.save('y_synth1.npy',y_norm)
 
 
-def display_synth_samples_1(x_norm,y_norm,n):
+def display_synth_samples_1(x_norm,y_norm,n,rule):
 
-    n_samples = n#len(x_norm)
+    #n_samples = len(x_norm)
+    n_samples=1000*n
     n_slots = 3
 
     x_raw = np.zeros(np.shape(x_norm),dtype=int)
@@ -1054,47 +1162,44 @@ def display_synth_samples_1(x_norm,y_norm,n):
     for i in range(n_samples):
         
         # screen dimensions
-        x_raw[i,0] = x_norm[i,0]*1000
-        x_raw[i,1] = x_norm[i,1]*1000
+        x_raw[i,0] = int(np.round(x_norm[i,0]*1000))
+        x_raw[i,1] = int(np.round(x_norm[i,1]*1000))
         
         # slot0
-        x_raw[i,2] = x_norm[i,2]*1000 # slot0 twisted h
-        x_raw[i,3] = x_norm[i,3]*1000 # slot0 twisted w
-        x_raw[i,4] = x_norm[i,4]      # slot0 category score 0
-        x_raw[i,5] = x_norm[i,5]      # slot0 category score 1
-        x_raw[i,6] = x_norm[i,6]      # slot0 category score 2
+        x_raw[i,2] = int(np.round(x_norm[i,2]*1000)) # slot0 twisted h
+        x_raw[i,3] = int(np.round(x_norm[i,3]*1000)) # slot0 twisted w
+        x_raw[i,4] = int(np.round(x_norm[i,4]))      # slot0 category score 0
+        x_raw[i,5] = int(np.round(x_norm[i,5]))      # slot0 category score 1
+        x_raw[i,6] = int(np.round(x_norm[i,6]))      # slot0 category score 2
 
         # slot1
-        x_raw[i,7] = x_norm[i,7]*1000
-        x_raw[i,8] = x_norm[i,8]*1000
-        x_raw[i,9] = x_norm[i,9]
-        x_raw[i,10] = x_norm[i,10]
-        x_raw[i,11] = x_norm[i,11]
+        x_raw[i,7] = int(np.round(x_norm[i,7]*1000))
+        x_raw[i,8] = int(np.round(x_norm[i,8]*1000))
+        x_raw[i,9] = int(np.round(x_norm[i,9]))
+        x_raw[i,10] = int(np.round(x_norm[i,10]))
+        x_raw[i,11] = int(np.round(x_norm[i,11]))
 
         # slot2
-        x_raw[i,12] = x_norm[i,12]*1000
-        x_raw[i,13] = x_norm[i,13]*1000
-        x_raw[i,14] = x_norm[i,14]
-        x_raw[i,15] = x_norm[i,15]
-        x_raw[i,16] = x_norm[i,16]
+        x_raw[i,12] = int(np.round(x_norm[i,12]*1000))
+        x_raw[i,13] = int(np.round(x_norm[i,13]*1000))
+        x_raw[i,14] = int(np.round(x_norm[i,14]))
+        x_raw[i,15] = int(np.round(x_norm[i,15]))
+        x_raw[i,16] = int(np.round(x_norm[i,16]))
 
         # slot0
-        y_raw[i,0] = y_norm[i,0]*1000 # slot0 top
-        y_raw[i,1] = y_norm[i,1]*1000 # slot0 left
+        y_raw[i,0] = int(np.round(y_norm[i,0]*1000)) # slot0 top
+        y_raw[i,1] = int(np.round(y_norm[i,1]*1000)) # slot0 left
         deltas_raw[i,0] = y_norm[i,2]*1.5 # slot0 delta
 
         # slot1
-        y_raw[i,2] = y_norm[i,3]*1000
-        y_raw[i,3] = y_norm[i,4]*1000
+        y_raw[i,2] = int(np.round(y_norm[i,3]*1000))
+        y_raw[i,3] = int(np.round(y_norm[i,4]*1000))
         deltas_raw[i,1] = y_norm[i,5]*1.5
 
         # slot2
-        y_raw[i,4] = y_norm[i,6]*1000
-        y_raw[i,5] = y_norm[i,7]*1000
+        y_raw[i,4] = int(np.round(y_norm[i,6]*1000))
+        y_raw[i,5] = int(np.round(y_norm[i,7]*1000))
         deltas_raw[i,2] = y_norm[i,8]*1.5
-    class Clay():
-        def __init__(self):
-            return None
 
     n_slots = 3
     new_samples = []
@@ -1106,22 +1211,22 @@ def display_synth_samples_1(x_norm,y_norm,n):
         for num_slot in range(n_slots):
 
             slot = Clay()
-            slot.top = y_raw[num_sample,ky+0]
-            slot.left = y_raw[num_sample,ky+1]
+            slot.top = int(y_raw[num_sample,ky+0])
+            slot.left = int(y_raw[num_sample,ky+1])
 
-            slot.h =  x_raw[num_sample,kx+0]/deltas_raw[num_sample,num_slot]
-            slot.w =  x_raw[num_sample,kx+1]/deltas_raw[num_sample,num_slot]
-            slot.low = slot.top+slot.h
-            slot.right = slot.left+slot.w
+            slot.h =  int(x_raw[num_sample,kx+0]/deltas_raw[num_sample,num_slot])
+            slot.w =  int(x_raw[num_sample,kx+1]/deltas_raw[num_sample,num_slot])
+            slot.low = int(slot.top+slot.h)
+            slot.right = int(slot.left+slot.w)
 
-            type0 = x_raw[num_sample,kx+2]
-            type1 = x_raw[num_sample,kx+3]
-            type2 = x_raw[num_sample,kx+4]
+            if slot.right > 300: print("tag2 : error", slot.right)
+
+            type0 = int(x_raw[num_sample,kx+2])
+            type1 = int(x_raw[num_sample,kx+3])
+            type2 = int(x_raw[num_sample,kx+4])
             slot.type = np.asarray([type0,type1,type2])
 
             slot.type = list(slot.type)
-
-
             slots.append(slot)
 
             kx+=5
@@ -1129,13 +1234,42 @@ def display_synth_samples_1(x_norm,y_norm,n):
 
         new_samples.append(slots)
 
-    for sample in new_samples[:n]:
+    k=0
+    for sample in new_samples:
         slots = sample#[0]
 
-        #if type0 == type1 == type2 == [0,1,0]:
-        show_screen5(slots,600,300)
+        '''
+        s0=slots[0]
+        s1=slots[1]
+        s2=slots[2]
+        print("right 0",s0.left+s0.w)
+        print("right 1",s1.left+s1.w)
+        print("right 2",s2.left+s2.w)
+        '''
 
-def add_shape_color5(npa,top,left,low,right,r,g,b):    
+        if k<n:
+            if sample_is_concerned_by_rule(slots,rule):
+                show_screen5_ancien(slots,600,300)
+                k+=1
+
+# get type of a synth1 sample
+def get_types_trigram(slots):
+    tp=""
+    for s in slots:
+        if s.type == [1, 0, 0]: tp += "r"
+        if s.type == [0, 1, 0]: tp += "g"
+        if s.type == [0, 0, 1]: tp += "b"
+    return tp
+
+def sample_is_concerned_by_rule(slots,rule):
+    tp=get_types_trigram(slots)
+    spec_combinations=get_special_combinations_trigram()
+    ok = False
+    if rule=="general" and tp not in spec_combinations:ok=True
+    if rule==tp:ok=True
+    return ok
+
+def add_shape_color5_ancien(npa,top,left,low,right,r,g,b):    
     for i in range(len(npa)):
         for j in range(len(npa[0])):
             if top<=i<=low and left<=j<=right:
@@ -1144,8 +1278,8 @@ def add_shape_color5(npa,top,left,low,right,r,g,b):
                 npa[i,j,2] = b
     return npa
 
-def show_screen5(slots,screen_h,screen_w):
-    npa = init_screen(screen_h,screen_w)
+def show_screen5_ancien(slots,screen_h,screen_w):
+    npa = init_screen_ancien(screen_h,screen_w)
     for num_slot in range(len(slots)):
         slot = slots[num_slot]
         
@@ -1157,11 +1291,11 @@ def show_screen5(slots,screen_h,screen_w):
         
         [r,g,b] = 155*np.asarray(slot.type)+100
         
-        npa = add_shape_color5(npa,slot.top,slot.left,slot.low,slot.right,r,g,b)
-
+        npa = add_shape_color5_ancien(npa,slot.top,slot.left,slot.low,slot.right,r,g,b)
+    npa=resize_image(npa, 100)
     display(get_image_from_npa(npa))
 
-def init_screen(h,w):    
+def init_screen_ancien(h,w):    
     npa = np.zeros((h,w,4),dtype=np.uint8)
     for i in range(len(npa)):
         for j in range(len(npa[0])):
